@@ -6,4 +6,4 @@ matplotlib
 numpy
 plotly
 scipy
-skikit-learn
+scikit-learn
