@@ -7,9 +7,9 @@ pages = {
     "Seiten": [
         st.Page("pages/index.py", title="Homepage", icon="🏠", default=True),
         st.Page(
-            "pages/data_cleaning.py",
-            title="Datenbereinigung",
-            icon="🧼",
+            "pages/data_exploration.py",
+            title="Daten-Exploration",
+            icon="🔦",
         ),
         st.Page(
             "pages/visualization.py",

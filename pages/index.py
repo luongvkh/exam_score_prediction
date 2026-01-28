@@ -2,72 +2,54 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
+
 @st.cache_data
 def load_data():
     return pd.read_csv("data/processed/exam_score_prediction_cleaned.csv", index_col=0)
 
+
 def main():
-    # Titel
     st.title("🎓 Exam Score Prediction")
     st.markdown("### Datenanalyse und ML-Vorhersage")
     st.markdown("---")
 
-    st.markdown("## Herzlich Willkommen! 😊")
+    st.title("Herzlich Willkommen! 😊")
     st.markdown(
         "Diese App analysiert das [Exam Score Prediction Dataset](https://www.kaggle.com/datasets/kundanbedmutha/exam-score-prediction-dataset) und macht Vorhersagen."
     )
 
     st.markdown("### Inhalte")
-    st.markdown("""
-                1. 🧼 Datenbereinigung
+    st.markdown(
+        """
+                1. 🔦 Daten-Exploration
                 2. 🔍 Visualisierung
                 3. 🔮 Machine Learning Vorhersage
-                """)
+                """
+    )
     st.markdown("---")
 
     # Daten laden
     df = load_data()
     filtered_df = df
 
-    # Sidebar: Filter
-    # st.sidebar.title("Filter ⚙️")
-    # age_range = st.sidebar.slider(
-    #     "Exam Score:",
-    #     int(df["exam_score"].min()),
-    #     int(df["exam_score"].max()),
-    #     (30, 70),
-    # )
-
-    # show_condition = st.sidebar.radio("Zeige:", ["Alle", "Nur < 50", "Nur > 50"])
-
-    # Daten filtern
-    # filtered_df = df[
-    #     (df["exam_score"] >= age_range[0]) & (df["exam_score"] <= age_range[1])
-    # ]
-
-    # if show_condition == "Nur < 50":
-    #     filtered_df = filtered_df[filtered_df["condition"] == 1]
-    # elif show_condition == "Nur > 50":
-    #     filtered_df = filtered_df[filtered_df["condition"] == 0]
-
     # Main: Anzeige
-    st.subheader("Informationen zum Datensatz")
-    st.write(f"Zeige **{len(filtered_df)}** von {len(df)} Studierenden")
+    st.markdown("### Informationen zum Datensatz")
 
     # Metrics
     col1, col2, col3 = st.columns(3)
     col1.metric("Studierende", len(filtered_df))
     col2.metric("Ø Alter", f"{filtered_df['age'].mean():.1f}")
-    col3.metric("Ø Exam Score", f"{filtered_df['exam_score'].mean():.0f}")
+    col3.metric("Ø Exam Score", f"{filtered_df['exam_score'].mean():.1f}")
 
     # Daten anzeigen
-    if st.checkbox("Zeige Rohdaten"):
+    with st.expander("Zeige Rohdaten"):
         st.dataframe(filtered_df)
 
-    # Visualisierung
-    st.subheader("Visualisierung")
+    st.markdown("---")
+    # Häufigkeitsverteilungen
+    st.markdown("### Häufigkeitsverteilungen")
     feature = st.selectbox(
-        "Feature wählen:",
+        "Wähle ein Feature:",
         [
             "age",
             "gender",
@@ -85,10 +67,26 @@ def main():
     )
 
     fig, ax = plt.subplots(figsize=(10, 5))
-    ax.hist(filtered_df[feature], bins=20, edgecolor="black", color="skyblue")
-    ax.set_xlabel(feature)
-    ax.set_ylabel("Häufigkeit")
-    ax.set_title(f"Verteilung: {feature}")
+    # Check ob Boolean oder Categorial
+    if filtered_df[feature].dtype == "bool" or filtered_df[feature].nunique() <= 5:
+        # Für Boolean/Categorial Features: Bar Chart statt Histogram
+        value_counts = filtered_df[feature].value_counts()
+        ax.bar(
+            value_counts.index.astype(str),
+            value_counts.values,
+            edgecolor="black",
+            color="skyblue",
+        )
+        ax.set_xlabel(feature)
+        ax.set_ylabel("Häufigkeit")
+        ax.set_title(f"Verteilung: {feature}")
+    else:
+        # Für numerische Features: Histogram
+        ax.hist(filtered_df[feature], bins=20, edgecolor="black", color="skyblue")
+        ax.set_xlabel(feature)
+        ax.set_ylabel("Häufigkeit")
+        ax.set_title(f"Verteilung: {feature}")
+
     ax.grid(True, alpha=0.3)
     st.pyplot(fig)
 
